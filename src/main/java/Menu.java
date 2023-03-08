@@ -25,4 +25,8 @@ public class Menu {
         System.out.println("Enter your movement, W=UP, S=DOWN, A=LEFT, D=RIGHT, done=exit:");
         return userInput.nextLine();
     }
+
+    public void userWonMessage() {
+        System.out.println("Congrats, you've navigated the board successfully!");
+    }
 }

@@ -1,36 +1,55 @@
+import java.util.Arrays;
+
 public class Board {
 
     private String[][] field;
     private Player player;
-    private int[] playerPosition;
+    private Coordinate playerCoordinate;
+    private Coordinate completionCoordinate;
 
     public Board(int height, int width, Player player){
+        //Creates rectangular board where top left is position [0][0] and bottom right is [height][width]
         field = new String[height][width];
+
         this.player = player;
-        playerPosition = new int[]{height - 2, width - 2};
+        //Puts player in bottom right corner of map generated.
+        playerCoordinate = new Coordinate(width - 2, height - 2);
+
+
+        //Puts completion mark in top left of map.
+        completionCoordinate = new Coordinate(1, 1);
+
     }
 
     ///TODO assign each array value that way printing can be easier and make levels
+
     public String toString (){
         String board = "";
         String horizontalLine = horizontalBreak(field[0].length + field[0].length/2);
-        for (int i = 0; i < field.length; i++) {
-            for (int j = 0; j < field[i].length; j++) {
-                if(i % 2 == 0) {
+        for (int y = 0; y < field.length; y++) {
+            for (int x = 0; x < field[y].length; x++) {
+                if(y % 2 == 0) {
                     board = board.concat(horizontalLine);
-                    j = field[i].length;
-                } else if (i == playerPosition[0] && j == playerPosition[1]) {
+                    x = field[y].length;
+                } else if (y == completionCoordinate.getyPosition() && x == completionCoordinate.getxPosition()) {
+                    board = board.concat("XX");
+                } else if (y == playerCoordinate.getyPosition() && x == playerCoordinate.getxPosition()) {
                     board = board.concat(player.getName());
-                } else if(j % 2 == 0){
+                } else if(x % 2 == 0){
                     board = board.concat("|");
                 }
                 else {
+                    field[y][x] = "  ";
                     board = board.concat("  ");
                 }
             }
             board = board.concat("\n");
         }
         return board;
+    }
+
+    public boolean boardCompleted(){
+        return completionCoordinate.equals(playerCoordinate);
     }
 
     private String horizontalBreak(int width){
@@ -43,49 +62,51 @@ public class Board {
     }
 
     //TODO use boolean to notify player of invalid movement
-    public boolean movePlayer(String movement){
+    public boolean movePlayer(String movement, int speed){
         if(movement.equalsIgnoreCase("w")){
-            return movePlayerUp();
+            return movePlayerUp(speed);
         } else if (movement.equalsIgnoreCase("s")) {
-            return movePlayerDown();
+            return movePlayerDown(speed);
         } else if(movement.equalsIgnoreCase("a")){
-            return movePlayerLeft();
+            return movePlayerLeft(speed);
         } else{
-            return movePlayerRight();
+            return movePlayerRight(speed);
         }
     }
 
-    public boolean movePlayerUp() {
-        int newPos = playerPosition[0] - 2;
-        if(newPos > 0){
-            playerPosition[0] = newPos;
+    //TODO build helper methods in player to reduce coordinate by speed to simplify these problems
+    public boolean movePlayerUp(int speed) {
+        int possibleMoves = playerCoordinate.getyPosition() / 2;
+        if(possibleMoves > 0){
+            int newPos = playerCoordinate.getyPosition() -= (possibleMoves >= speed) ?  speed*2 : possibleMoves*2;
+            playerCoordinate.setyPosition();
             return true;
         }
         return false;
     }
 
-    public boolean movePlayerDown() {
-        int newPos = playerPosition[0] + 2;
-        if(newPos < field.length){
-            playerPosition[0] = newPos;
+    public boolean movePlayerDown(int speed) {
+        int possibleMoves = (field.length - playerCoordinate[0]) / 2;
+        if(possibleMoves > 0){
+            playerCoordinate[0] += (possibleMoves >= speed) ?  speed*2 : possibleMoves*2;
             return true;
         }
         return false;
     }
 
-    public boolean movePlayerLeft() {
-        int newPos = playerPosition[1] - 2;
-        if(newPos > 0 ){
-            playerPosition[1] = newPos;
+    public boolean movePlayerLeft(int speed) {
+        int possibleMoves = playerCoordinate[1] / 2;
+        if(possibleMoves > 0){
+            playerCoordinate[1] -= (possibleMoves >= speed) ?  speed*2 : possibleMoves*2;
             return true;
         }
         return false;
     }
 
-    public boolean movePlayerRight() {
-        int newPos = playerPosition[1] + 2;
-        if(newPos < field[0].length){
-            playerPosition[1] = newPos;
+    public boolean movePlayerRight(int speed) {
+        int possibleMoves = (field[0].length - playerCoordinate[1]) / 2;
+        if(possibleMoves > 0){
+            playerCoordinate[1] += (possibleMoves >= speed) ?  speed*2 : possibleMoves*2;
             return true;
         }
         return false;
