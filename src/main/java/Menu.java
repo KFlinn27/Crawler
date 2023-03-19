@@ -29,4 +29,15 @@ public class Menu {
     public void userWonMessage() {
         System.out.println("Congrats, you've navigated the board successfully!");
     }
+
+    public boolean consumeBoon(Boon boon) {
+        System.out.println("You've landed on a " + boon.getName() + " boon! Would you like to consume(Y/N)?");
+        return userInput.nextLine().equalsIgnoreCase("y");
+    }
+
+    public int getMoves(int speed) {
+        System.out.println("How many spaces would you like to move? Enter a number between 1 and " + speed + ":");
+        int moves = Integer.parseInt(userInput.nextLine());
+        return moves;
+    }
 }

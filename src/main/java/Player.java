@@ -20,4 +20,14 @@ public class Player {
     public void setSpeed(int i) {
         this.speed = i;
     }
+
+    public void consumeBoon(Boon boon){
+        if(boon.getName().equalsIgnoreCase("speed")){
+            speed++;
+        }
+    }
+
+    public void increaseSpeed(){
+        this.speed++;
+    }
 }

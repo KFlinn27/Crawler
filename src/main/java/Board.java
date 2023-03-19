@@ -1,4 +1,6 @@
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Board {
 
@@ -6,6 +8,7 @@ public class Board {
     private Player player;
     private Coordinate playerCoordinate;
     private Coordinate completionCoordinate;
+    private Map<Coordinate, Boon> boons;
 
     public Board(int height, int width, Player player){
         //Creates rectangular board where top left is position [0][0] and bottom right is [height][width]
@@ -19,6 +22,19 @@ public class Board {
         //Puts completion mark in top left of map.
         completionCoordinate = new Coordinate(1, 1);
 
+        boons = new HashMap<>();
+        boons.put(new Coordinate(3,3), new Boon("speed"));
+    }
+
+    public void keyCheck(){
+        Coordinate toCheck = new Coordinate(3, 3);
+        boolean debug = boons.get(toCheck) != null;
+        boolean contains = boons.containsKey(toCheck);
+        for(Map.Entry<Coordinate, Boon> current : boons.entrySet()){
+            boolean foreached = toCheck == current.getKey();
+            boolean forhed = toCheck.equals(current.getKey());
+            int placeholder = 5;
+        }
     }
 
     ///TODO assign each array value that way printing can be easier and make levels
@@ -32,19 +48,33 @@ public class Board {
                     board = board.concat(horizontalLine);
                     x = field[y].length;
                 } else if (y == completionCoordinate.getyPosition() && x == completionCoordinate.getxPosition()) {
+                    field[y][x] = "xx";
                     board = board.concat("XX");
                 } else if (y == playerCoordinate.getyPosition() && x == playerCoordinate.getxPosition()) {
                     board = board.concat(player.getName());
+                    field[y][x] = player.getName();
                 } else if(x % 2 == 0){
                     board = board.concat("|");
                 }
                 else {
-                    field[y][x] = "  ";
-                    board = board.concat("  ");
+                    Coordinate spot = new Coordinate(x, y);
+                    boolean hasBoon = boons.containsKey(spot);
+                    if(boons.containsKey(spot)){
+                        field[y][x] = "SP";
+                        board = board.concat("SP");
+                    } else {
+                        field[y][x] = "  ";
+                        board = board.concat("  ");
+                    }
                 }
             }
             board = board.concat("\n");
         }
+//        for(Map.Entry<Coordinate, Boon> current: boons.entrySet()){
+//            if(current.getValue().getName().equalsIgnoreCase("speed") && current.getKey() != playerCoordinate){
+//                field[current.getKey().getyPosition()][current.getKey().getxPosition()] = "XX";
+//            }
+//        }
         return board;
     }
 
@@ -78,37 +108,59 @@ public class Board {
     public boolean movePlayerUp(int speed) {
         int possibleMoves = playerCoordinate.getyPosition() / 2;
         if(possibleMoves > 0){
-            int newPos = playerCoordinate.getyPosition() -= (possibleMoves >= speed) ?  speed*2 : possibleMoves*2;
-            playerCoordinate.setyPosition();
+            playerCoordinate.reduceYPosition(((possibleMoves >= speed) ?  speed*2 : possibleMoves*2));
             return true;
         }
         return false;
     }
 
     public boolean movePlayerDown(int speed) {
-        int possibleMoves = (field.length - playerCoordinate[0]) / 2;
+        int possibleMoves = (field.length - playerCoordinate.getyPosition()) / 2;
         if(possibleMoves > 0){
-            playerCoordinate[0] += (possibleMoves >= speed) ?  speed*2 : possibleMoves*2;
+            playerCoordinate.increaseYPosition((possibleMoves >= speed) ?  speed*2 : possibleMoves*2);
             return true;
         }
         return false;
     }
 
     public boolean movePlayerLeft(int speed) {
-        int possibleMoves = playerCoordinate[1] / 2;
+        int possibleMoves = playerCoordinate.getxPosition() / 2;
         if(possibleMoves > 0){
-            playerCoordinate[1] -= (possibleMoves >= speed) ?  speed*2 : possibleMoves*2;
+            playerCoordinate.reduceXPosition((possibleMoves >= speed) ?  speed*2 : possibleMoves*2);
             return true;
         }
         return false;
     }
 
     public boolean movePlayerRight(int speed) {
-        int possibleMoves = (field[0].length - playerCoordinate[1]) / 2;
+        int possibleMoves = (field[0].length - playerCoordinate.getxPosition()) / 2;
         if(possibleMoves > 0){
-            playerCoordinate[1] += (possibleMoves >= speed) ?  speed*2 : possibleMoves*2;
+            playerCoordinate.increaseXPosition((possibleMoves >= speed) ?  speed*2 : possibleMoves*2);
             return true;
         }
         return false;
+    }
+
+    public boolean playerOnBoon(){
+        if(boons.containsKey(playerCoordinate)){
+            return true;
+        }
+        return false;
+    }
+
+    public String[][] getField() {
+        return field;
+    }
+
+    public Coordinate getPlayerCoordinate() {
+        return playerCoordinate;
+    }
+
+    public Boon getBoon(){
+        return boons.get(playerCoordinate);
+    }
+
+    public void removeBoon() {
+        boons.remove(playerCoordinate);
     }
 }

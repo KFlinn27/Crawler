@@ -8,7 +8,7 @@ public class Coordinate {
     }
 
     public int getxPosition() {
-        return xPosition;
+        return Math.max(xPosition, 1);
     }
 
     public void setxPosition(int xPosition) {
@@ -16,7 +16,7 @@ public class Coordinate {
     }
 
     public int getyPosition() {
-        return yPosition;
+        return Math.max(yPosition, 1);
     }
 
     public void setyPosition(int yPosition) {
@@ -33,5 +33,31 @@ public class Coordinate {
         }
         Coordinate toCheck = (Coordinate) o;
         return toCheck.getyPosition() == this.yPosition && toCheck.getxPosition() == this.xPosition;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int result = 17;
+        result = 31 * result + xPosition;
+        result = 31 * result + yPosition;
+        return result;
+    }
+
+    public void reduceYPosition(int i) {
+
+        yPosition -= i;
+    }
+
+    public void increaseYPosition(int i) {
+        yPosition += i;
+    }
+
+    public void reduceXPosition(int i) {
+        xPosition -= i;
+    }
+
+    public void increaseXPosition(int i) {
+        xPosition += i;
     }
 }
