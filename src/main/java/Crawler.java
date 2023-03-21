@@ -4,6 +4,7 @@ public class Crawler {
     private final Menu menu;
     private Board board;
     private Player player;
+    private Enemy enemy;
 
 
     public static void main(String[] args) {
@@ -15,36 +16,45 @@ public class Crawler {
 
     }
 
-    private Crawler(){
+    private Crawler() {
         menu = new Menu();
     }
 
-    private void run(){
+    private void run() {
 
         int height = menu.getHeight();
         int width = menu.getWidth();
         player = new Player("KF");
         player.setSpeed(2);
-        board = new Board(height*2+1, width*2+1, player);
+        enemy = new Enemy("EN");
+        board = new Board(height * 2 + 1, width * 2 + 1, player, enemy);
         printBoard();
-        board.keyCheck();
-        while(!board.boardCompleted()) {
-            interactWithPosition();
-            String movement = menu.getMovement();
-            if(movement.equalsIgnoreCase("done")) break;
-            int moves = menu.getMoves(player.getSpeed());
-            board.movePlayer(movement, moves);
-
+        while (!board.boardCompleted()) {
+            int movesRemaining = player.getSpeed();
+            while (movesRemaining > 0) {
+                interactWithPosition();
+                String movement = menu.getMovement();
+                if (movement.equalsIgnoreCase("done")) break;
+                int moves = menu.getMoves(player.getSpeed());
+                board.movePlayer(movement, moves);
+                movesRemaining -= moves;
+                printBoard();
+                if(board.boardCompleted()){
+                    break;
+                }
+            }
+            board.moveEnemy();
+            System.out.println(board.getEnemyCoordinate().getxPosition() + " " + board.getEnemyCoordinate().getyPosition());
             printBoard();
         }
-        gameWon(board.boardCompleted());
+        gameWon(board.gameResult());
     }
 
     private void interactWithPosition() {
-        if(board.playerOnBoon()){
+        if (board.playerOnBoon()) {
             Boon boon = board.getBoon();
-            if(menu.consumeBoon(boon)){
-                if(boon.getName().equals("speed")){
+            if (menu.consumeBoon(boon)) {
+                if (boon.getName().equals("speed")) {
                     player.increaseSpeed();
                     board.removeBoon();
                 }
@@ -52,12 +62,16 @@ public class Crawler {
         }
     }
 
-    private void gameWon(boolean boardCompleted) {
-        menu.userWonMessage();
+    private void gameWon(boolean gameResult) {
+        if (gameResult) {
+            menu.userWonMessage();
+        } else {
+            menu.userLostMessage();
+        }
     }
 
 
-    private void printBoard(){
+    private void printBoard() {
         menu.printBoard(board.toString());
     }
 }

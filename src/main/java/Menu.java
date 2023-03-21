@@ -40,4 +40,8 @@ public class Menu {
         int moves = Integer.parseInt(userInput.nextLine());
         return moves;
     }
+
+    public void userLostMessage() {
+        System.out.println("You have lost! Better lucky next time!");
+    }
 }

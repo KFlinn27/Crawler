@@ -23,6 +23,12 @@ public class Coordinate {
         this.yPosition = yPosition;
     }
 
+    public boolean furtherFromTarget(Coordinate toCompare){
+        int xDiff = this.xPosition - toCompare.xPosition;
+        int yDiff = this.yPosition - toCompare.yPosition;
+        return (xDiff + yDiff) > 0;
+    }
+
     @Override
     public boolean equals(Object o){
         if(o == this) {
