@@ -26,8 +26,7 @@ public class Crawler {
         int width = menu.getWidth();
         player = new Player("KF");
         player.setSpeed(2);
-        enemy = new Enemy("EN");
-        board = new Board(height * 2 + 1, width * 2 + 1, player, enemy);
+        board = new Board(height * 2 + 1, width * 2 + 1, player);
         printBoard();
         while (!board.boardCompleted()) {
             int movesRemaining = player.getSpeed();
@@ -44,7 +43,6 @@ public class Crawler {
                 }
             }
             board.moveEnemy();
-            System.out.println(board.getEnemyCoordinate().getxPosition() + " " + board.getEnemyCoordinate().getyPosition());
             printBoard();
         }
         gameWon(board.gameResult());

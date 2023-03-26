@@ -2,10 +2,17 @@ public class Enemy {
 
     private String name;
     private int speed;
+    private Coordinate position;
 
-    public Enemy(String name){
+    public Enemy(String name, Coordinate position){
         this.name = name;
         this.speed = 1;
+        this.position = position;
+    }
+
+
+    public Coordinate getPosition() {
+        return position;
     }
 
     public String getName() {

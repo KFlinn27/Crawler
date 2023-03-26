@@ -1,6 +1,4 @@
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Board {
 
@@ -8,11 +6,10 @@ public class Board {
     private Player player;
     private Coordinate playerCoordinate;
     private Coordinate completionCoordinate;
-    private Coordinate enemyCoordinate;
     private Map<Coordinate, Boon> boons;
-    private Enemy enemy;
+    private List<Enemy> enemies;
 
-    public Board(int height, int width, Player player, Enemy enemy) {
+    public Board(int height, int width, Player player) {
         //Creates rectangular board where top left is position [0][0] and bottom right is [height][width]
         field = new String[height][width];
 
@@ -20,21 +17,17 @@ public class Board {
         //Puts player in bottom right corner of map generated.
         playerCoordinate = new Coordinate(width - 2, height - 2);
 
-
-        this.enemy = enemy;
-
-        enemyCoordinate = generateEnemyStart();
+        enemies = new ArrayList<>();
+        for(int i = 1; i<5;i++){
+            Enemy enemy = new Enemy("E" + i, generateEnemyStart());
+            enemies.add(enemy);
+        }
 
         //Puts completion mark in top left of map.
         completionCoordinate = new Coordinate(1, 1);
 
         boons = new HashMap<>();
         boons.put(new Coordinate(3, 3), new Boon("speed"));
-    }
-
-
-    public Coordinate getEnemyCoordinate() {
-        return enemyCoordinate;
     }
 
     ///TODO assign each array value that way printing can be easier and make levels
@@ -53,18 +46,17 @@ public class Board {
                 } else if (y == playerCoordinate.getyPosition() && x == playerCoordinate.getxPosition()) {
                     board = board.concat(player.getName());
                     field[y][x] = player.getName();
-                } else if (y == enemyCoordinate.getyPosition() && x == enemyCoordinate.getxPosition()) {
-                    board = board.concat(enemy.getName());
-                    field[y][x] = enemy.getName();
                 } else if (x % 2 == 0) {
                     board = board.concat("|");
                 } else {
                     Coordinate spot = new Coordinate(x, y);
-                    boolean hasBoon = boons.containsKey(spot);
                     if (boons.containsKey(spot)) {
                         field[y][x] = "SP";
                         board = board.concat("SP");
-                    } else {
+                    } else if(enemiesHasCoordinate(spot)){
+                        field[y][x] = nameOfEnemyAtCoord(spot);
+                        board = board.concat(nameOfEnemyAtCoord(spot));
+                    }else {
                         field[y][x] = "  ";
                         board = board.concat("  ");
                     }
@@ -89,11 +81,33 @@ public class Board {
         if(enemyXCoordinate % 2 == 0){
             enemyXCoordinate++;
         }
-        return new Coordinate(enemyXCoordinate, enemyYCoordinate);
+        Coordinate generated = new Coordinate(enemyXCoordinate, enemyYCoordinate);
+        if(enemiesHasCoordinate(generated)){
+            return generateEnemyStart();
+        }
+        return generated;
     }
 
     public boolean boardCompleted() {
-        return completionCoordinate.equals(playerCoordinate) || enemyCoordinate.equals(playerCoordinate);
+        return completionCoordinate.equals(playerCoordinate) || enemiesHasCoordinate(playerCoordinate);
+    }
+
+    public boolean enemiesHasCoordinate(Coordinate toCheck){
+        for(Enemy enemy : enemies){
+            if(enemy.getPosition().equals(toCheck)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String nameOfEnemyAtCoord(Coordinate toCheck){
+        for(Enemy enemy : enemies){
+            if(enemy.getPosition().equals(toCheck)){
+                return enemy.getName();
+            }
+        }
+        return "  ";
     }
 
     private String horizontalBreak(int width) {
@@ -118,22 +132,42 @@ public class Board {
         }
     }
 
+
+    /*
+    Move enemies 1 by 1, determining movement by distance of the player from the target related to the enemies distance.
+    If player is further, try to increase x and y axis to approach player, if closer reduce x and y axis.
+     */
     public void moveEnemy(){
-        if(playerCoordinate.furtherFromTarget(enemyCoordinate)){
-            if(playerCoordinate.getyPosition() - enemyCoordinate.getyPosition() > playerCoordinate.getxPosition() - enemyCoordinate.getxPosition()){
-                enemyCoordinate.increaseYPosition(enemy.getSpeed()*2);
-            }
-            else {
-                enemyCoordinate.increaseXPosition(enemy.getSpeed()*2);
-            }
-        } else {
-            if(enemyCoordinate.getyPosition() - playerCoordinate.getyPosition() > enemyCoordinate.getxPosition() - playerCoordinate.getxPosition()){
-                enemyCoordinate.reduceYPosition(enemy.getSpeed()*2);
-            }
-            else {
-                enemyCoordinate.reduceXPosition(enemy.getSpeed()*2);
+        //TODO, low priority, possible to sort list by distance from player? would allow closest enemy to move first and not
+        // be blocked by a lower index going first
+        for(Enemy enemy: enemies){
+            int xPos = enemy.getPosition().getxPosition();
+            int yPos = enemy.getPosition().getyPosition();
+            if (playerCoordinate.furtherFromTarget(enemy.getPosition())) {
+                //TODO, Low priority, Improve this algorithm, recursive? Conditionals seem redundant and can be improved
+                //TODO, Med priority, helper method for determining x or y axis distance being greater, not very readable at moment
+                if (playerCoordinate.getyPosition() - yPos > playerCoordinate.getxPosition() - xPos && coordinateClear(xPos, yPos + 2)) {
+                    enemy.getPosition().increaseYPosition(enemy.getSpeed() * 2);
+                } else if(coordinateClear(xPos + 2, yPos)){
+                    enemy.getPosition().increaseXPosition(enemy.getSpeed() * 2);
+                } else if(coordinateClear(xPos, yPos +2)){
+                    enemy.getPosition().increaseYPosition(enemy.getSpeed() * 2);
+                }
+            } else {
+                if (yPos - playerCoordinate.getyPosition() > xPos - playerCoordinate.getxPosition() && coordinateClear(xPos, yPos - 2)) {
+                    enemy.getPosition().reduceYPosition(enemy.getSpeed() * 2);
+                } else if(coordinateClear(xPos - 2,  yPos)){
+                    enemy.getPosition().reduceXPosition(enemy.getSpeed() * 2);
+                } else if(coordinateClear(xPos, yPos -2)){
+                    enemy.getPosition().reduceYPosition(enemy.getSpeed() * 2);
+                }
             }
         }
+    }
+
+    public boolean coordinateClear(int x, int y){
+        Coordinate toCheck = new Coordinate(x, y);
+        return !boons.containsKey(toCheck) && !enemiesHasCoordinate(toCheck);
     }
 
     //TODO build helper methods in player to reduce coordinate by speed to simplify these problems
