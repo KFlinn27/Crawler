@@ -3,6 +3,12 @@ import java.util.Scanner;
 public class Menu {
     Scanner userInput = new Scanner(System.in);
 
+    public void clrscr(){
+        for(int i = 0; i < 50; i++){
+            System.out.println();
+        }
+    }
+
     public int getHeight() {
         System.out.println("How tall should the board be?");
         return Integer.parseInt(userInput.nextLine());
@@ -43,5 +49,41 @@ public class Menu {
 
     public void userLostMessage() {
         System.out.println("You have lost! Better lucky next time!");
+    }
+
+    public void welcomeMsg() {
+        System.out.println("Welcome to Crawler! Version 1.0, created by Kyle Flinner.");
+        System.out.println("You will control a character marked by your initials you input, you will need" +
+                "\nto navigate enemies and reach the square marked \"XX\". If you see a position " +
+                "\nmarked \"SP\", this is a speed buff. It will increase your movement by 1 if you consume it. ");
+        System.out.println("Good luck!");
+    }
+
+    public String getPlayer() {
+
+        System.out.print("Please enter your desired two letter initials(ie KF, IJ):");
+        String playerName = userInput.nextLine();
+        while(playerName.length() != 2){
+            System.out.print("Please enter a two character initial:");
+            playerName = userInput.nextLine();
+        }
+        return playerName;
+    }
+
+    public int promptForInt(String msg) {
+        System.out.print(msg);
+        while(true){
+            try{
+                System.out.println();
+                System.out.print("Enter number here:");
+                int x = Integer.parseInt(userInput.nextLine());
+                System.out.println();
+                return x;
+            } catch (NumberFormatException e){
+                System.out.println();
+                System.err.println("You did not enter a number, try again!");
+                System.out.println();
+            }
+        }
     }
 }

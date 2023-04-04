@@ -1,5 +1,5 @@
 public class Player {
-    private final int DEFAULT_SPEED = 1;
+    private final int DEFAULT_SPEED = 2;
 
     private String name;
     private int speed;

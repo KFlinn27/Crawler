@@ -9,17 +9,19 @@ public class Board {
     private Map<Coordinate, Boon> boons;
     private List<Enemy> enemies;
 
-    public Board(int height, int width, Player player) {
+    public Board(int height, int width, Player player, int enemiesToSpawn) {
         //Creates rectangular board where top left is position [0][0] and bottom right is [height][width]
+        height = height * 2 + 1;
+        width = width * 2 + 1;
         field = new String[height][width];
 
         this.player = player;
         //Puts player in bottom right corner of map generated.
-        playerCoordinate = new Coordinate(width - 2, height - 2);
+        playerCoordinate = new Coordinate(field.length - 2, field[0].length - 2);
 
         enemies = new ArrayList<>();
-        for(int i = 1; i<5;i++){
-            Enemy enemy = new Enemy("E" + i, generateEnemyStart());
+        for(int i = 1; i<enemiesToSpawn+1;i++){
+            Enemy enemy = new Enemy("E" + i, generateEnemyStart(height, width));
             enemies.add(enemy);
         }
 
@@ -27,7 +29,8 @@ public class Board {
         completionCoordinate = new Coordinate(1, 1);
 
         boons = new HashMap<>();
-        boons.put(new Coordinate(3, 3), new Boon("speed"));
+        boons.put((generateEnemyStart(height, width)), new Boon("speed"));
+
     }
 
     ///TODO assign each array value that way printing can be easier and make levels
@@ -67,11 +70,14 @@ public class Board {
         return board;
     }
 
-    public Coordinate generateEnemyStart(){
-        int lowerBoundX = 3;
-        int upperBoundX = 8;
-        int lowerBoundY = 3;
-        int upperBoundY = 8;
+    /*Randomize enemy start currently hard coded for a 10x10 board. Places enemies towards middle rather than crowding
+    player.*/
+
+    public Coordinate generateEnemyStart(int height, int width){
+        int lowerBoundX = height - (height - 6);
+        int upperBoundX = height - 6;
+        int lowerBoundY = width - (width - 6);
+        int upperBoundY = width - 6;
 
         int enemyXCoordinate = (int) Math.floor(Math.random() * (upperBoundX - lowerBoundX + 1) + lowerBoundX);
         int enemyYCoordinate = (int) Math.floor(Math.random() * (upperBoundY - lowerBoundY + 1) + lowerBoundY);
@@ -83,14 +89,18 @@ public class Board {
         }
         Coordinate generated = new Coordinate(enemyXCoordinate, enemyYCoordinate);
         if(enemiesHasCoordinate(generated)){
-            return generateEnemyStart();
+            return generateEnemyStart(height, width);
         }
         return generated;
     }
 
+    /*Checks player position versus position of enemies or the completion marker.*/
+
     public boolean boardCompleted() {
         return completionCoordinate.equals(playerCoordinate) || enemiesHasCoordinate(playerCoordinate);
     }
+
+    /*Looks through enemy list to see if an enemy is on a coordinate.*/
 
     public boolean enemiesHasCoordinate(Coordinate toCheck){
         for(Enemy enemy : enemies){
